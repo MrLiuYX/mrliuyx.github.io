@@ -1,0 +1,1354 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <meta name="description" content="MrLiuYX 的个人宇宙入口：游戏框架、渲染、动画与工程作品。">
+  <meta property="og:title" content="MrLiuYX | Personal Universe">
+  <meta property="og:description" content="个人宇宙 / 科技霓虹 / 美轮美奂的 GitHub Pages 网站。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://avatars.githubusercontent.com/u/94041976?v=4">
+  <title>MrLiuYX | Personal Universe</title>
+  <link rel="preconnect" href="https://avatars.githubusercontent.com">
+  <link rel="preconnect" href="https://unpkg.com">
+  <style>
+    :root {
+      --bg: #050609;
+      --bg-soft: #0d1118;
+      --surface: rgba(14, 18, 27, 0.72);
+      --surface-strong: rgba(20, 27, 39, 0.9);
+      --text: #f6fbff;
+      --muted: #a8b4c7;
+      --line: rgba(255, 255, 255, 0.16);
+      --cyan: #5ee7ff;
+      --magenta: #ff5bd7;
+      --lime: #9dff7a;
+      --gold: #ffd166;
+      --rose: #ff7a90;
+      --shadow: 0 22px 80px rgba(0, 0, 0, 0.42);
+      --radius: 8px;
+      --nav-h: 72px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    body[data-theme="light"] {
+      --bg: #f7fbff;
+      --bg-soft: #e9f2fa;
+      --surface: rgba(255, 255, 255, 0.78);
+      --surface-strong: rgba(255, 255, 255, 0.94);
+      --text: #111827;
+      --muted: #526071;
+      --line: rgba(17, 24, 39, 0.14);
+      --shadow: 0 18px 60px rgba(28, 44, 68, 0.18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--text);
+      background:
+        linear-gradient(140deg, rgba(94, 231, 255, 0.16), transparent 24%),
+        linear-gradient(40deg, rgba(255, 91, 215, 0.16), transparent 28%),
+        var(--bg);
+      overflow-x: hidden;
+      transition: background-color 260ms ease, color 260ms ease;
+    }
+
+    body::selection {
+      color: #071013;
+      background: var(--cyan);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: -4;
+      width: 100%;
+      height: 100%;
+    }
+
+    .aurora {
+      position: fixed;
+      inset: -12vh -16vw auto -16vw;
+      z-index: -3;
+      height: 58vh;
+      pointer-events: none;
+      overflow: hidden;
+      filter: saturate(1.3);
+      opacity: 0.72;
+    }
+
+    .aurora__ribbon {
+      position: absolute;
+      width: 150vw;
+      height: 30vh;
+      left: -20vw;
+      transform-origin: 50% 50%;
+      background:
+        linear-gradient(90deg, transparent, rgba(94, 231, 255, 0.35), rgba(157, 255, 122, 0.24), rgba(255, 91, 215, 0.35), transparent);
+      border-radius: 50%;
+      filter: blur(28px);
+      animation: drift 16s ease-in-out infinite alternate;
+    }
+
+    .aurora__ribbon:nth-child(1) {
+      top: 8vh;
+      rotate: -8deg;
+    }
+
+    .aurora__ribbon:nth-child(2) {
+      top: 18vh;
+      rotate: 7deg;
+      animation-duration: 19s;
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 209, 102, 0.22), rgba(94, 231, 255, 0.32), rgba(255, 122, 144, 0.26), transparent);
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      pointer-events: none;
+      opacity: 0.12;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+    }
+
+    .cursor-halo {
+      position: fixed;
+      z-index: 10;
+      width: 220px;
+      height: 220px;
+      left: 0;
+      top: 0;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate3d(-50%, -50%, 0);
+      background: radial-gradient(circle, rgba(94, 231, 255, 0.18), rgba(255, 91, 215, 0.08) 42%, transparent 68%);
+      transition: opacity 160ms ease;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 9;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      backdrop-filter: blur(18px);
+      background: color-mix(in srgb, var(--bg) 78%, transparent);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      width: min(1160px, 100%);
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      font-weight: 800;
+      font-size: 1rem;
+    }
+
+    .brand__mark {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background:
+        linear-gradient(135deg, rgba(94, 231, 255, 0.35), rgba(255, 91, 215, 0.24)),
+        var(--surface);
+      box-shadow: 0 0 28px rgba(94, 231, 255, 0.22);
+    }
+
+    .brand__text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .nav__links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav__links a,
+    .icon-button,
+    .primary-button,
+    .ghost-button {
+      min-height: 40px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+    }
+
+    .nav__links a {
+      padding: 0 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .nav__links a:hover,
+    .nav__links a.is-active {
+      color: var(--text);
+      border-color: var(--line);
+      background: var(--surface);
+    }
+
+    .nav__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .icon-button {
+      width: 42px;
+      background: var(--surface);
+      border-color: var(--line);
+    }
+
+    .icon-button:hover,
+    .primary-button:hover,
+    .ghost-button:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--cyan) 60%, var(--line));
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section {
+      padding: 92px 24px;
+    }
+
+    .section--hero {
+      display: flex;
+      align-items: center;
+      min-height: calc(100vh - 112px);
+      padding-top: 48px;
+      padding-bottom: 56px;
+    }
+
+    .wrap {
+      width: min(1160px, 100%);
+      margin: 0 auto;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+      gap: 48px;
+      align-items: center;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 12px;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-size: 0.92rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      margin-top: 24px;
+      max-width: 840px;
+      font-size: 4.4rem;
+      line-height: 1.02;
+      font-weight: 900;
+    }
+
+    .hero__name {
+      display: block;
+      color: transparent;
+      background: linear-gradient(105deg, var(--cyan), var(--text) 32%, var(--magenta) 66%, var(--gold));
+      -webkit-background-clip: text;
+      background-clip: text;
+      text-shadow: 0 0 42px rgba(94, 231, 255, 0.2);
+    }
+
+    .hero__line {
+      display: block;
+      margin-top: 8px;
+      color: var(--text);
+    }
+
+    .type-row {
+      min-height: 38px;
+      margin-top: 22px;
+      color: var(--cyan);
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .type-row::after {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 5px;
+      vertical-align: -2px;
+      background: var(--cyan);
+      animation: blink 760ms step-end infinite;
+    }
+
+    .hero__copy {
+      max-width: 680px;
+      margin-top: 22px;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.85;
+    }
+
+    .hero__actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 30px;
+    }
+
+    .primary-button,
+    .ghost-button {
+      padding: 0 18px;
+      font-weight: 800;
+    }
+
+    .primary-button {
+      color: #071013;
+      background: linear-gradient(135deg, var(--cyan), var(--lime));
+      box-shadow: 0 18px 48px rgba(94, 231, 255, 0.24);
+    }
+
+    .ghost-button {
+      color: var(--text);
+      border-color: var(--line);
+      background: var(--surface);
+    }
+
+    .hero__stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      max-width: 640px;
+      margin-top: 34px;
+    }
+
+    .stat {
+      min-height: 86px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--text);
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    .stat span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .orbit {
+      position: relative;
+      min-height: 520px;
+      perspective: 1200px;
+    }
+
+    .profile-core {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 245px;
+      aspect-ratio: 1;
+      translate: -50% -50%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: grid;
+      place-items: center;
+      background:
+        linear-gradient(135deg, rgba(94, 231, 255, 0.16), rgba(255, 91, 215, 0.16)),
+        var(--surface);
+      box-shadow:
+        0 0 0 10px rgba(255, 255, 255, 0.04),
+        0 0 70px rgba(94, 231, 255, 0.26),
+        var(--shadow);
+      transform-style: preserve-3d;
+      animation: breathe 5.5s ease-in-out infinite;
+    }
+
+    .profile-core img {
+      width: 172px;
+      height: 172px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 4px solid rgba(255, 255, 255, 0.26);
+      box-shadow: 0 0 32px rgba(255, 91, 215, 0.18);
+    }
+
+    .ring {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      width: 430px;
+      height: 160px;
+      translate: -50% -50%;
+      border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+      border-radius: 50%;
+      transform: rotateX(70deg) rotateZ(-24deg);
+      animation: spin 16s linear infinite;
+    }
+
+    .ring:nth-of-type(2) {
+      width: 370px;
+      height: 132px;
+      border-color: color-mix(in srgb, var(--magenta) 42%, transparent);
+      animation-duration: 20s;
+      animation-direction: reverse;
+      transform: rotateX(66deg) rotateZ(24deg);
+    }
+
+    .satellite {
+      position: absolute;
+      width: 170px;
+      min-height: 108px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      transform-style: preserve-3d;
+      animation: floaty 6s ease-in-out infinite;
+    }
+
+    .satellite strong {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.96rem;
+    }
+
+    .satellite span {
+      display: block;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .satellite--a {
+      top: 44px;
+      left: 22px;
+    }
+
+    .satellite--b {
+      right: 0;
+      top: 112px;
+      animation-delay: -1.2s;
+    }
+
+    .satellite--c {
+      left: 36px;
+      bottom: 42px;
+      animation-delay: -2.2s;
+    }
+
+    .satellite--d {
+      right: 42px;
+      bottom: 24px;
+      animation-delay: -3s;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+
+    .section-head h2 {
+      font-size: 2.35rem;
+      line-height: 1.12;
+    }
+
+    .section-head p {
+      max-width: 520px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid--projects {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .project-card,
+    .skill-card,
+    .timeline-item,
+    .contact-panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 160ms ease, border-color 180ms ease, background-color 180ms ease;
+    }
+
+    .project-card {
+      min-height: 260px;
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .project-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--gold));
+      opacity: 0.9;
+    }
+
+    .project-card h3 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 1.15rem;
+    }
+
+    .project-card p {
+      margin-top: 16px;
+      color: var(--muted);
+      line-height: 1.7;
+      flex: 1;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .tag {
+      min-height: 28px;
+      padding: 4px 9px;
+      border-radius: var(--radius);
+      color: var(--muted);
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 72%, transparent);
+      font-size: 0.78rem;
+    }
+
+    .project-card .repo-link {
+      margin-top: 18px;
+      color: var(--cyan);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+    }
+
+    .grid--skills {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .skill-card {
+      min-height: 190px;
+      padding: 20px;
+    }
+
+    .skill-card i {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: var(--radius);
+      color: #071013;
+      background: linear-gradient(135deg, var(--gold), var(--cyan));
+      font-style: normal;
+      margin-bottom: 16px;
+    }
+
+    .skill-card h3 {
+      font-size: 1.05rem;
+      margin-bottom: 10px;
+    }
+
+    .skill-card p {
+      color: var(--muted);
+      line-height: 1.65;
+      font-size: 0.94rem;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 14px;
+      position: relative;
+    }
+
+    .timeline-item {
+      min-height: 118px;
+      padding: 22px;
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .timeline-item time {
+      color: var(--cyan);
+      font-weight: 800;
+    }
+
+    .timeline-item h3 {
+      margin-bottom: 8px;
+      font-size: 1.08rem;
+    }
+
+    .timeline-item p {
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .contact-panel {
+      padding: 32px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .contact-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(94, 231, 255, 0.16), transparent 38%),
+        linear-gradient(300deg, rgba(255, 91, 215, 0.13), transparent 36%);
+      pointer-events: none;
+    }
+
+    .contact-panel > * {
+      position: relative;
+    }
+
+    .contact-panel h2 {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .contact-panel p {
+      color: var(--muted);
+      line-height: 1.75;
+      max-width: 700px;
+    }
+
+    .contact-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: end;
+    }
+
+    .footer {
+      padding: 34px 24px 44px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 0.92rem;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 620ms ease, transform 620ms ease;
+    }
+
+    .reveal.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .particle {
+      position: fixed;
+      z-index: 11;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      pointer-events: none;
+      background: var(--particle-color, var(--cyan));
+      box-shadow: 0 0 18px currentColor;
+      animation: pop 680ms ease-out forwards;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate3d(-4vw, 0, 0) scaleY(1);
+      }
+      to {
+        transform: translate3d(6vw, 9vh, 0) scaleY(1.2);
+      }
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    @keyframes breathe {
+      50% {
+        transform: translateZ(28px) scale(1.03);
+      }
+    }
+
+    @keyframes spin {
+      to {
+        rotate: 360deg;
+      }
+    }
+
+    @keyframes floaty {
+      50% {
+        translate: 0 -14px;
+      }
+    }
+
+    @keyframes pop {
+      to {
+        opacity: 0;
+        transform: translate3d(var(--dx), var(--dy), 0) scale(0.25);
+      }
+    }
+
+    @media (max-width: 980px) {
+      .nav {
+        grid-template-columns: 1fr auto;
+      }
+
+      .nav__links {
+        display: none;
+      }
+
+      .hero {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 3.1rem;
+      }
+
+      .orbit {
+        min-height: 430px;
+      }
+
+      .grid--projects,
+      .grid--skills {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 720px) {
+      .topbar {
+        padding: 0 16px;
+      }
+
+      .section {
+        padding: 68px 16px;
+      }
+
+      .section--hero {
+        min-height: auto;
+        padding-top: 38px;
+      }
+
+      h1 {
+        font-size: 2.35rem;
+      }
+
+      .hero__copy {
+        font-size: 1rem;
+      }
+
+      .hero__stats,
+      .grid--projects,
+      .grid--skills {
+        grid-template-columns: 1fr;
+      }
+
+      .orbit {
+        min-height: 390px;
+      }
+
+      .profile-core {
+        width: 205px;
+      }
+
+      .profile-core img {
+        width: 142px;
+        height: 142px;
+      }
+
+      .ring {
+        width: 320px;
+        height: 116px;
+      }
+
+      .satellite {
+        width: 148px;
+        min-height: 96px;
+      }
+
+      .satellite--a,
+      .satellite--c {
+        left: 0;
+      }
+
+      .satellite--b,
+      .satellite--d {
+        right: 0;
+      }
+
+      .section-head,
+      .contact-panel,
+      .timeline-item {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        display: grid;
+      }
+
+      .contact-actions {
+        justify-content: start;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 1ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: 1ms !important;
+      }
+
+      .cursor-halo,
+      #starfield {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="aurora" aria-hidden="true">
+    <div class="aurora__ribbon"></div>
+    <div class="aurora__ribbon"></div>
+  </div>
+  <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-halo" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <nav class="nav" aria-label="主导航">
+      <a class="brand" href="#home" aria-label="MrLiuYX 首页">
+        <span class="brand__mark"><i data-lucide="sparkles" aria-hidden="true"></i></span>
+        <span class="brand__text">MrLiuYX</span>
+      </a>
+      <div class="nav__links">
+        <a href="#projects">作品</a>
+        <a href="#skills">能力</a>
+        <a href="#path">轨迹</a>
+        <a href="#contact">连接</a>
+      </div>
+      <div class="nav__actions">
+        <button class="icon-button" id="themeToggle" type="button" aria-label="切换明暗主题">
+          <i data-lucide="moon" aria-hidden="true"></i>
+        </button>
+        <a class="icon-button" href="https://github.com/MrLiuYX" target="_blank" rel="noreferrer" aria-label="打开 GitHub">
+          <i data-lucide="git-branch" aria-hidden="true"></i>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="section section--hero" id="home">
+      <div class="wrap hero">
+        <div class="hero__content reveal">
+          <span class="kicker"><i data-lucide="orbit" aria-hidden="true"></i> Personal Universe / Tech Aurora</span>
+          <h1>
+            <span class="hero__name">MrLiuYX</span>
+            <span class="hero__line">把想象写进引擎与渲染。</span>
+          </h1>
+          <div class="type-row" id="typewriter" aria-live="polite"></div>
+          <p class="hero__copy">
+            这里是我的动态个人入口：聚合游戏框架、动画系统、渲染实验与工程笔记。
+            我喜欢把复杂系统拆成清晰模块，也喜欢让每个交互都带一点光。
+          </p>
+          <div class="hero__actions">
+            <a class="primary-button" href="#projects"><i data-lucide="rocket" aria-hidden="true"></i>进入作品</a>
+            <a class="ghost-button" href="https://github.com/MrLiuYX" target="_blank" rel="noreferrer"><i data-lucide="code-2" aria-hidden="true"></i>GitHub</a>
+          </div>
+          <div class="hero__stats" aria-label="个人概览">
+            <div class="stat">
+              <strong>Game</strong>
+              <span>框架、战斗、工具链与玩法系统</span>
+            </div>
+            <div class="stat">
+              <strong>Render</strong>
+              <span>实时渲染、图形管线与视觉实验</span>
+            </div>
+            <div class="stat">
+              <strong>Motion</strong>
+              <span>动画系统、状态机与工程化表达</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="orbit reveal" aria-label="个人宇宙视觉">
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="profile-core tilt-card">
+            <img src="https://avatars.githubusercontent.com/u/94041976?v=4" alt="MrLiuYX GitHub 头像">
+          </div>
+          <div class="satellite satellite--a tilt-card">
+            <strong><i data-lucide="boxes" aria-hidden="true"></i>ECS</strong>
+            <span>把对象、组件与系统组织成可扩展的游戏结构。</span>
+          </div>
+          <div class="satellite satellite--b tilt-card">
+            <strong><i data-lucide="aperture" aria-hidden="true"></i>Render</strong>
+            <span>从管线到画面，追求干净的实时视觉表达。</span>
+          </div>
+          <div class="satellite satellite--c tilt-card">
+            <strong><i data-lucide="workflow" aria-hidden="true"></i>Tools</strong>
+            <span>用工具减少重复，把灵感留给创造。</span>
+          </div>
+          <div class="satellite satellite--d tilt-card">
+            <strong><i data-lucide="sparkle" aria-hidden="true"></i>Craft</strong>
+            <span>工程不只正确，也可以漂亮、顺手、耐看。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <h2>精选作品</h2>
+          <p>从游戏框架到渲染器，这些仓库记录了我对系统、性能和表现力的持续探索。</p>
+        </div>
+        <div class="grid grid--projects">
+          <article class="project-card tilt-card reveal">
+            <h3>ECSAnimation <i data-lucide="external-link" aria-hidden="true"></i></h3>
+            <p>围绕 ECS 思路组织动画能力，让状态、播放、数据和系统协作更清楚。</p>
+            <div class="tags">
+              <span class="tag">Animation</span>
+              <span class="tag">ECS</span>
+              <span class="tag">Gameplay</span>
+            </div>
+            <a class="repo-link" href="https://github.com/MrLiuYX/ECSAnimation" target="_blank" rel="noreferrer">查看仓库 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+          </article>
+          <article class="project-card tilt-card reveal">
+            <h3>Renderer <i data-lucide="external-link" aria-hidden="true"></i></h3>
+            <p>渲染实验与图形管线实践，关注画面结构、性能边界与工程可维护性。</p>
+            <div class="tags">
+              <span class="tag">Rendering</span>
+              <span class="tag">Graphics</span>
+              <span class="tag">Engine</span>
+            </div>
+            <a class="repo-link" href="https://github.com/MrLiuYX/Renderer" target="_blank" rel="noreferrer">查看仓库 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+          </article>
+          <article class="project-card tilt-card reveal">
+            <h3>LCGameFramework <i data-lucide="external-link" aria-hidden="true"></i></h3>
+            <p>游戏工程基础设施，沉淀模块化框架、运行时组织和可复用的开发模式。</p>
+            <div class="tags">
+              <span class="tag">Framework</span>
+              <span class="tag">Unity</span>
+              <span class="tag">Architecture</span>
+            </div>
+            <a class="repo-link" href="https://github.com/MrLiuYX/LCGameFramework" target="_blank" rel="noreferrer">查看仓库 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="skills">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <h2>能力星图</h2>
+          <p>我把技术栈看成一组彼此牵引的轨道：越往深处，越需要清晰的结构和可靠的反馈。</p>
+        </div>
+        <div class="grid grid--skills">
+          <article class="skill-card tilt-card reveal">
+            <i data-lucide="gamepad-2" aria-hidden="true"></i>
+            <h3>游戏系统</h3>
+            <p>玩法模块、状态管理、对象生命周期、数据驱动与可调试工具。</p>
+          </article>
+          <article class="skill-card tilt-card reveal">
+            <i data-lucide="cpu" aria-hidden="true"></i>
+            <h3>引擎架构</h3>
+            <p>模块边界、运行时调度、资源组织、编辑器流程与长期维护。</p>
+          </article>
+          <article class="skill-card tilt-card reveal">
+            <i data-lucide="blend" aria-hidden="true"></i>
+            <h3>实时渲染</h3>
+            <p>材质、光照、后处理、性能分析与面向效果的图形实验。</p>
+          </article>
+          <article class="skill-card tilt-card reveal">
+            <i data-lucide="wrench" aria-hidden="true"></i>
+            <h3>开发工具</h3>
+            <p>把重复操作交给脚本和工具，把注意力留给判断与创造。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="path">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <h2>工程轨迹</h2>
+          <p>个人主页不只是展示，也是一张持续更新的地图，标记我正在靠近的方向。</p>
+        </div>
+        <div class="timeline">
+          <article class="timeline-item reveal">
+            <time>Now</time>
+            <div>
+              <h3>构建更完整的个人技术入口</h3>
+              <p>用 GitHub Pages 汇总项目、方向和联系方式，让作品可以被快速理解。</p>
+            </div>
+          </article>
+          <article class="timeline-item reveal">
+            <time>Focus</time>
+            <div>
+              <h3>游戏框架与动画工程</h3>
+              <p>持续打磨模块化代码、数据结构和运行时反馈，让复杂系统更好协作。</p>
+            </div>
+          </article>
+          <article class="timeline-item reveal">
+            <time>Explore</time>
+            <div>
+              <h3>渲染与交互视觉</h3>
+              <p>把技术细节变成可感知的体验，在工程可靠性和视觉表达之间找到平衡。</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="wrap">
+        <div class="contact-panel reveal">
+          <div>
+            <h2>让想法进入下一条轨道。</h2>
+            <p>欢迎从 GitHub 进入我的项目，也可以通过 Issues、仓库讨论或个人资料页找到我。这个入口会随着新作品持续更新。</p>
+          </div>
+          <div class="contact-actions">
+            <a class="primary-button" href="https://github.com/MrLiuYX" target="_blank" rel="noreferrer"><i data-lucide="git-branch" aria-hidden="true"></i>GitHub</a>
+            <a class="ghost-button" href="https://github.com/MrLiuYX?tab=repositories" target="_blank" rel="noreferrer"><i data-lucide="folder-git-2" aria-hidden="true"></i>Repositories</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">Built for GitHub Pages. Designed as a living personal universe.</div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script>
+    const root = document.documentElement;
+    const body = document.body;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const savedTheme = localStorage.getItem("theme");
+    const initialTheme = savedTheme || "dark";
+    body.dataset.theme = initialTheme;
+
+    const themeToggle = document.querySelector("#themeToggle");
+    const setThemeIcon = () => {
+      const iconName = body.dataset.theme === "dark" ? "moon" : "sun";
+      themeToggle.innerHTML = `<i data-lucide="${iconName}" aria-hidden="true"></i>`;
+      if (window.lucide) window.lucide.createIcons();
+    };
+
+    themeToggle.addEventListener("click", () => {
+      const next = body.dataset.theme === "dark" ? "light" : "dark";
+      body.dataset.theme = next;
+      localStorage.setItem("theme", next);
+      setThemeIcon();
+    });
+
+    const phrases = [
+      "Game framework engineer",
+      "Realtime rendering explorer",
+      "Animation system builder",
+      "Tools-first creative developer"
+    ];
+    const typeTarget = document.querySelector("#typewriter");
+    let phraseIndex = 0;
+    let charIndex = 0;
+    let deleting = false;
+
+    function typeLoop() {
+      const phrase = phrases[phraseIndex];
+      typeTarget.textContent = phrase.slice(0, charIndex);
+
+      if (!deleting && charIndex < phrase.length) {
+        charIndex += 1;
+        setTimeout(typeLoop, 54);
+        return;
+      }
+
+      if (!deleting && charIndex === phrase.length) {
+        deleting = true;
+        setTimeout(typeLoop, 1200);
+        return;
+      }
+
+      if (deleting && charIndex > 0) {
+        charIndex -= 1;
+        setTimeout(typeLoop, 28);
+        return;
+      }
+
+      deleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      setTimeout(typeLoop, 240);
+    }
+
+    const canvas = document.querySelector("#starfield");
+    const ctx = canvas.getContext("2d");
+    let width = 0;
+    let height = 0;
+    let stars = [];
+    const pointer = { x: 0, y: 0, active: false };
+
+    function resizeCanvas() {
+      width = canvas.width = Math.floor(window.innerWidth * window.devicePixelRatio);
+      height = canvas.height = Math.floor(window.innerHeight * window.devicePixelRatio);
+      canvas.style.width = window.innerWidth + "px";
+      canvas.style.height = window.innerHeight + "px";
+      const count = Math.min(180, Math.max(90, Math.floor(window.innerWidth * window.innerHeight / 7800)));
+      stars = Array.from({ length: count }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        z: 0.35 + Math.random() * 1.4,
+        r: 0.7 + Math.random() * 1.9,
+        vx: -0.12 + Math.random() * 0.24,
+        vy: 0.18 + Math.random() * 0.52,
+        phase: Math.random() * Math.PI * 2
+      }));
+    }
+
+    function drawStars(t) {
+      ctx.clearRect(0, 0, width, height);
+      const dark = body.dataset.theme === "dark";
+      const base = dark ? "246, 251, 255" : "17, 24, 39";
+      const glow = dark ? "94, 231, 255" : "255, 91, 215";
+      for (const star of stars) {
+        star.x += star.vx * star.z * window.devicePixelRatio;
+        star.y += star.vy * star.z * window.devicePixelRatio;
+
+        if (pointer.active) {
+          const dx = star.x - pointer.x * window.devicePixelRatio;
+          const dy = star.y - pointer.y * window.devicePixelRatio;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 130 * window.devicePixelRatio) {
+            const push = (1 - dist / (130 * window.devicePixelRatio)) * 0.8;
+            star.x += dx * push * 0.05;
+            star.y += dy * push * 0.05;
+          }
+        }
+
+        if (star.y > height + 8) star.y = -8;
+        if (star.x < -8) star.x = width + 8;
+        if (star.x > width + 8) star.x = -8;
+
+        const alpha = 0.38 + Math.sin(t * 0.0018 + star.phase) * 0.24;
+        const size = star.r * window.devicePixelRatio;
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(${base}, ${Math.max(0.28, alpha)})`;
+        ctx.arc(star.x, star.y, size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (star.r > 1.7) {
+          ctx.strokeStyle = `rgba(${glow}, ${alpha * 0.42})`;
+          ctx.lineWidth = Math.max(1, window.devicePixelRatio * 0.7);
+          ctx.beginPath();
+          ctx.moveTo(star.x - size * 3, star.y);
+          ctx.lineTo(star.x + size * 3, star.y);
+          ctx.moveTo(star.x, star.y - size * 3);
+          ctx.lineTo(star.x, star.y + size * 3);
+          ctx.stroke();
+        }
+      }
+      requestAnimationFrame(drawStars);
+    }
+
+    const halo = document.querySelector(".cursor-halo");
+    window.addEventListener("pointermove", (event) => {
+      pointer.x = event.clientX;
+      pointer.y = event.clientY;
+      pointer.active = true;
+      halo.style.opacity = "1";
+      halo.style.transform = `translate3d(${event.clientX - 110}px, ${event.clientY - 110}px, 0)`;
+    });
+
+    window.addEventListener("pointerleave", () => {
+      pointer.active = false;
+      halo.style.opacity = "0";
+    });
+
+    function burst(event) {
+      if (reduceMotion) return;
+      const colors = ["#5ee7ff", "#ff5bd7", "#9dff7a", "#ffd166", "#ff7a90"];
+      for (let i = 0; i < 16; i += 1) {
+        const particle = document.createElement("span");
+        particle.className = "particle";
+        const angle = (Math.PI * 2 * i) / 16;
+        const distance = 34 + Math.random() * 56;
+        particle.style.left = event.clientX + "px";
+        particle.style.top = event.clientY + "px";
+        particle.style.setProperty("--dx", Math.cos(angle) * distance + "px");
+        particle.style.setProperty("--dy", Math.sin(angle) * distance + "px");
+        particle.style.setProperty("--particle-color", colors[i % colors.length]);
+        document.body.appendChild(particle);
+        particle.addEventListener("animationend", () => particle.remove(), { once: true });
+      }
+    }
+
+    window.addEventListener("click", burst);
+
+    const reveals = document.querySelectorAll(".reveal");
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.16 });
+    reveals.forEach((item) => observer.observe(item));
+
+    document.querySelectorAll(".tilt-card").forEach((card) => {
+      card.addEventListener("pointermove", (event) => {
+        if (reduceMotion) return;
+        const rect = card.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width - 0.5;
+        const y = (event.clientY - rect.top) / rect.height - 0.5;
+        card.style.transform = `rotateX(${y * -8}deg) rotateY(${x * 10}deg) translateY(-4px)`;
+      });
+      card.addEventListener("pointerleave", () => {
+        card.style.transform = "";
+      });
+    });
+
+    const navLinks = Array.from(document.querySelectorAll(".nav__links a"));
+    const sections = navLinks.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+    const markActive = () => {
+      let activeId = sections[0].id;
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top < 140) activeId = section.id;
+      }
+      navLinks.forEach((link) => {
+        link.classList.toggle("is-active", link.getAttribute("href") === "#" + activeId);
+      });
+    };
+
+    window.addEventListener("scroll", markActive, { passive: true });
+    window.addEventListener("resize", resizeCanvas);
+
+    if (window.lucide) window.lucide.createIcons();
+    setThemeIcon();
+    typeLoop();
+    resizeCanvas();
+    if (!reduceMotion) requestAnimationFrame(drawStars);
+    markActive();
+  </script>
+</body>
+</html>
