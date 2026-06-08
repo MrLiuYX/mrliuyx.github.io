@@ -1,0 +1,16 @@
+{
+  "name": "MrLiuYX Personal Universe",
+  "short_name": "MrLiuYX",
+  "description": "Game framework, realtime rendering, animation systems and engineering notes.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050609",
+  "theme_color": "#050609",
+  "icons": [
+    {
+      "src": "https://avatars.githubusercontent.com/u/94041976?v=4",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

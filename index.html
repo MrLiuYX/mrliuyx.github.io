@@ -5,13 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark light">
   <meta name="description" content="MrLiuYX 的个人宇宙入口：游戏框架、渲染、动画与工程作品。">
+  <meta name="author" content="MrLiuYX">
+  <meta name="theme-color" content="#050609">
+  <link rel="canonical" href="https://mrliuyx.github.io/">
   <meta property="og:title" content="MrLiuYX | Personal Universe">
   <meta property="og:description" content="个人宇宙 / 科技霓虹 / 美轮美奂的 GitHub Pages 网站。">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="https://mrliuyx.github.io/">
   <meta property="og:image" content="https://avatars.githubusercontent.com/u/94041976?v=4">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="MrLiuYX | Personal Universe">
+  <meta name="twitter:description" content="游戏框架、实时渲染、动画系统与工程作品入口。">
+  <meta name="twitter:image" content="https://avatars.githubusercontent.com/u/94041976?v=4">
   <title>MrLiuYX | Personal Universe</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050609'/%3E%3Cpath d='M32 8l4.9 17.1L54 30l-17.1 4.9L32 52l-4.9-17.1L10 30l17.1-4.9L32 8z' fill='%235ee7ff'/%3E%3Cpath d='M43 10l2.4 8.2L54 20.5l-8.6 2.3L43 31l-2.4-8.2L32 20.5l8.6-2.3L43 10z' fill='%23ff5bd7'/%3E%3C/svg%3E">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="preconnect" href="https://avatars.githubusercontent.com">
   <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://api.github.com">
   <style>
     :root {
       --bg: #050609;
@@ -160,6 +171,17 @@
       transition: opacity 160ms ease;
     }
 
+    .scroll-meter {
+      position: fixed;
+      inset: 0 auto auto 0;
+      z-index: 12;
+      width: var(--scroll, 0%);
+      height: 3px;
+      pointer-events: none;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta), var(--gold));
+      box-shadow: 0 0 20px rgba(94, 231, 255, 0.42);
+    }
+
     .topbar {
       position: sticky;
       top: 0;
@@ -260,6 +282,39 @@
     .ghost-button:hover {
       transform: translateY(-2px);
       border-color: color-mix(in srgb, var(--cyan) 60%, var(--line));
+    }
+
+    .mission-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 680px;
+      margin-top: 24px;
+    }
+
+    .mission-item {
+      min-height: 64px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--surface) 82%, transparent);
+      backdrop-filter: blur(14px);
+    }
+
+    .mission-item span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.74rem;
+      text-transform: uppercase;
+    }
+
+    .mission-item strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--text);
+      font-size: 0.92rem;
+      line-height: 1.25;
+      overflow-wrap: anywhere;
     }
 
     .page {
@@ -572,7 +627,7 @@
     }
 
     .project-card {
-      min-height: 260px;
+      min-height: 330px;
       padding: 22px;
       display: flex;
       flex-direction: column;
@@ -628,6 +683,35 @@
       align-items: center;
       gap: 8px;
       font-weight: 800;
+    }
+
+    .repo-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 18px;
+    }
+
+    .repo-metric {
+      min-height: 48px;
+      padding: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+    }
+
+    .repo-metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 0.72rem;
+    }
+
+    .repo-metric strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.88rem;
+      line-height: 1.2;
+      overflow-wrap: anywhere;
     }
 
     .grid--skills {
@@ -739,6 +823,86 @@
       color: var(--muted);
       text-align: center;
       font-size: 0.92rem;
+    }
+
+    .portal {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .portal.is-open {
+      display: flex;
+    }
+
+    .portal__backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(12px);
+    }
+
+    .portal__panel {
+      position: relative;
+      width: min(620px, 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-strong);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .portal__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .portal__head h2 {
+      font-size: 1rem;
+    }
+
+    .portal__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      padding: 18px;
+    }
+
+    .portal__item {
+      min-height: 76px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      display: grid;
+      align-content: center;
+      gap: 6px;
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .portal__item:hover {
+      transform: translateY(-2px);
+      border-color: color-mix(in srgb, var(--cyan) 60%, var(--line));
+    }
+
+    .portal__item strong {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .portal__item span {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.35;
     }
 
     .reveal {
@@ -854,6 +1018,7 @@
       }
 
       .hero__stats,
+      .mission-strip,
       .grid--projects,
       .grid--skills {
         grid-template-columns: 1fr;
@@ -875,6 +1040,11 @@
       .ring {
         width: 320px;
         height: 116px;
+      }
+
+      .ring:nth-of-type(2) {
+        width: 290px;
+        height: 104px;
       }
 
       .satellite {
@@ -905,6 +1075,10 @@
       .contact-actions {
         justify-content: start;
       }
+
+      .portal__grid {
+        grid-template-columns: 1fr;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -925,6 +1099,7 @@
   </style>
 </head>
 <body data-theme="dark">
+  <div class="scroll-meter" aria-hidden="true"></div>
   <canvas id="starfield" aria-hidden="true"></canvas>
   <div class="aurora" aria-hidden="true">
     <div class="aurora__ribbon"></div>
@@ -946,6 +1121,9 @@
         <a href="#contact">连接</a>
       </div>
       <div class="nav__actions">
+        <button class="icon-button" id="portalToggle" type="button" aria-label="打开快速入口">
+          <i data-lucide="panel-top-open" aria-hidden="true"></i>
+        </button>
         <button class="icon-button" id="themeToggle" type="button" aria-label="切换明暗主题">
           <i data-lucide="moon" aria-hidden="true"></i>
         </button>
@@ -970,6 +1148,20 @@
             这里是我的动态个人入口：聚合游戏框架、动画系统、渲染实验与工程笔记。
             我喜欢把复杂系统拆成清晰模块，也喜欢让每个交互都带一点光。
           </p>
+          <div class="mission-strip" aria-label="站点状态">
+            <div class="mission-item">
+              <span>Status</span>
+              <strong id="statusText">Online / Pages</strong>
+            </div>
+            <div class="mission-item">
+              <span>Local Time</span>
+              <strong id="clockText">--:--:--</strong>
+            </div>
+            <div class="mission-item">
+              <span>Signal</span>
+              <strong id="signalText">Rendering stars</strong>
+            </div>
+          </div>
           <div class="hero__actions">
             <a class="primary-button" href="#projects"><i data-lucide="rocket" aria-hidden="true"></i>进入作品</a>
             <a class="ghost-button" href="https://github.com/MrLiuYX" target="_blank" rel="noreferrer"><i data-lucide="code-2" aria-hidden="true"></i>GitHub</a>
@@ -1023,9 +1215,14 @@
           <p>从游戏框架到渲染器，这些仓库记录了我对系统、性能和表现力的持续探索。</p>
         </div>
         <div class="grid grid--projects">
-          <article class="project-card tilt-card reveal">
+          <article class="project-card tilt-card reveal" data-repo="ECSAnimation">
             <h3>ECSAnimation <i data-lucide="external-link" aria-hidden="true"></i></h3>
             <p>围绕 ECS 思路组织动画能力，让状态、播放、数据和系统协作更清楚。</p>
+            <div class="repo-metrics" aria-label="ECSAnimation 仓库信息">
+              <div class="repo-metric"><span>Language</span><strong data-field="language">Animation</strong></div>
+              <div class="repo-metric"><span>Stars</span><strong data-field="stars">0</strong></div>
+              <div class="repo-metric"><span>Forks</span><strong data-field="forks">0</strong></div>
+            </div>
             <div class="tags">
               <span class="tag">Animation</span>
               <span class="tag">ECS</span>
@@ -1033,9 +1230,14 @@
             </div>
             <a class="repo-link" href="https://github.com/MrLiuYX/ECSAnimation" target="_blank" rel="noreferrer">查看仓库 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
           </article>
-          <article class="project-card tilt-card reveal">
+          <article class="project-card tilt-card reveal" data-repo="Renderer">
             <h3>Renderer <i data-lucide="external-link" aria-hidden="true"></i></h3>
             <p>渲染实验与图形管线实践，关注画面结构、性能边界与工程可维护性。</p>
+            <div class="repo-metrics" aria-label="Renderer 仓库信息">
+              <div class="repo-metric"><span>Language</span><strong data-field="language">Graphics</strong></div>
+              <div class="repo-metric"><span>Stars</span><strong data-field="stars">0</strong></div>
+              <div class="repo-metric"><span>Forks</span><strong data-field="forks">0</strong></div>
+            </div>
             <div class="tags">
               <span class="tag">Rendering</span>
               <span class="tag">Graphics</span>
@@ -1043,9 +1245,14 @@
             </div>
             <a class="repo-link" href="https://github.com/MrLiuYX/Renderer" target="_blank" rel="noreferrer">查看仓库 <i data-lucide="arrow-up-right" aria-hidden="true"></i></a>
           </article>
-          <article class="project-card tilt-card reveal">
+          <article class="project-card tilt-card reveal" data-repo="LCGameFramework">
             <h3>LCGameFramework <i data-lucide="external-link" aria-hidden="true"></i></h3>
             <p>游戏工程基础设施，沉淀模块化框架、运行时组织和可复用的开发模式。</p>
+            <div class="repo-metrics" aria-label="LCGameFramework 仓库信息">
+              <div class="repo-metric"><span>Language</span><strong data-field="language">Framework</strong></div>
+              <div class="repo-metric"><span>Stars</span><strong data-field="stars">0</strong></div>
+              <div class="repo-metric"><span>Forks</span><strong data-field="forks">0</strong></div>
+            </div>
             <div class="tags">
               <span class="tag">Framework</span>
               <span class="tag">Unity</span>
@@ -1136,6 +1343,36 @@
     </section>
   </main>
 
+  <aside class="portal" id="portal" aria-hidden="true">
+    <div class="portal__backdrop" data-close-portal></div>
+    <div class="portal__panel" role="dialog" aria-modal="true" aria-labelledby="portalTitle">
+      <div class="portal__head">
+        <h2 id="portalTitle">轨道入口</h2>
+        <button class="icon-button" type="button" data-close-portal aria-label="关闭快速入口">
+          <i data-lucide="x" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="portal__grid">
+        <a class="portal__item" href="#projects" data-close-portal>
+          <strong><i data-lucide="rocket" aria-hidden="true"></i>精选作品</strong>
+          <span>ECSAnimation / Renderer / LCGameFramework</span>
+        </a>
+        <a class="portal__item" href="#skills" data-close-portal>
+          <strong><i data-lucide="cpu" aria-hidden="true"></i>能力星图</strong>
+          <span>游戏系统、引擎架构与实时渲染</span>
+        </a>
+        <a class="portal__item" href="https://github.com/MrLiuYX?tab=repositories" target="_blank" rel="noreferrer">
+          <strong><i data-lucide="folder-git-2" aria-hidden="true"></i>仓库矩阵</strong>
+          <span>进入 GitHub 查看全部项目</span>
+        </a>
+        <a class="portal__item" href="https://github.com/MrLiuYX" target="_blank" rel="noreferrer">
+          <strong><i data-lucide="user-round" aria-hidden="true"></i>GitHub 主页</strong>
+          <span>个人 README 与最新动态</span>
+        </a>
+      </div>
+    </div>
+  </aside>
+
   <footer class="footer">
     <div class="wrap">Built for GitHub Pages. Designed as a living personal universe.</div>
   </footer>
@@ -1162,6 +1399,50 @@
       localStorage.setItem("theme", next);
       setThemeIcon();
     });
+
+    const portal = document.querySelector("#portal");
+    const portalToggle = document.querySelector("#portalToggle");
+    const openPortal = () => {
+      portal.classList.add("is-open");
+      portal.setAttribute("aria-hidden", "false");
+      body.style.overflow = "hidden";
+    };
+    const closePortal = () => {
+      portal.classList.remove("is-open");
+      portal.setAttribute("aria-hidden", "true");
+      body.style.overflow = "";
+    };
+
+    portalToggle.addEventListener("click", openPortal);
+    portal.addEventListener("click", (event) => {
+      if (event.target.closest("[data-close-portal]")) closePortal();
+    });
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && portal.classList.contains("is-open")) closePortal();
+    });
+
+    const clockText = document.querySelector("#clockText");
+    const statusText = document.querySelector("#statusText");
+    const signalText = document.querySelector("#signalText");
+    const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Shanghai"
+    });
+    const updateClock = () => {
+      clockText.textContent = timeFormatter.format(new Date());
+      statusText.textContent = navigator.onLine ? "Online / Pages" : "Offline mirror";
+    };
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    const updateScrollMeter = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = max > 0 ? (window.scrollY / max) * 100 : 0;
+      root.style.setProperty("--scroll", `${Math.max(0, Math.min(100, progress))}%`);
+    };
 
     const phrases = [
       "Game framework engineer",
@@ -1340,13 +1621,42 @@
       });
     };
 
-    window.addEventListener("scroll", markActive, { passive: true });
-    window.addEventListener("resize", resizeCanvas);
+    async function loadRepoMeta() {
+      const cards = [...document.querySelectorAll("[data-repo]")];
+      const requests = cards.map(async (card) => {
+        const repo = card.dataset.repo;
+        const response = await fetch(`https://api.github.com/repos/MrLiuYX/${repo}`, {
+          headers: { Accept: "application/vnd.github+json" }
+        });
+        if (!response.ok) throw new Error(`GitHub API ${response.status}`);
+        const data = await response.json();
+        const language = card.querySelector('[data-field="language"]');
+        const stars = card.querySelector('[data-field="stars"]');
+        const forks = card.querySelector('[data-field="forks"]');
+        if (language) language.textContent = data.language || "Mixed";
+        if (stars) stars.textContent = new Intl.NumberFormat("en-US", { notation: "compact" }).format(data.stargazers_count || 0);
+        if (forks) forks.textContent = new Intl.NumberFormat("en-US", { notation: "compact" }).format(data.forks_count || 0);
+      });
+      const results = await Promise.allSettled(requests);
+      const loaded = results.filter((result) => result.status === "fulfilled").length;
+      signalText.textContent = loaded ? `${loaded} repos synced` : "Static fallback";
+    }
+
+    window.addEventListener("scroll", () => {
+      markActive();
+      updateScrollMeter();
+    }, { passive: true });
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      updateScrollMeter();
+    });
 
     if (window.lucide) window.lucide.createIcons();
     setThemeIcon();
     typeLoop();
     resizeCanvas();
+    updateScrollMeter();
+    loadRepoMeta();
     if (!reduceMotion) requestAnimationFrame(drawStars);
     markActive();
   </script>

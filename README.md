@@ -6,6 +6,8 @@ This is the static GitHub Pages site for `https://mrliuyx.github.io/`.
 
 - `index.html` - complete one-page personal universe website
 - `.nojekyll` - tells GitHub Pages to publish the files as-is
+- `site.webmanifest` - install/share metadata
+- `robots.txt` and `sitemap.xml` - basic crawler hints
 - `deploy_with_gh.ps1` - optional Windows deployment helper
 
 ## Deploy
@@ -18,4 +20,4 @@ If GitHub CLI is installed and authenticated, run:
 .\deploy_with_gh.ps1
 ```
 
-GitHub Pages will publish from the default branch root for a user site repository.
+GitHub Pages publishes user sites from the default branch root for a repository named `username.github.io`.
